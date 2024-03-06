@@ -1,0 +1,20 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <CustomBuild Include="C:\Users\vsmor\sa_lr1_app\build\windows\x64\CMakeFiles\71eba5b6b6d048a2344f0d1488005b14\flutter_windows.dll.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\vsmor\sa_lr1_app\build\windows\x64\CMakeFiles\25d64d4c027c4a31889b78da6c3cb9ee\flutter_assemble.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\vsmor\sa_lr1_app\windows\flutter\CMakeLists.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="C:\Users\vsmor\sa_lr1_app\build\windows\x64\flutter\CMakeFiles\flutter_assemble" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="CMake Rules">
+      <UniqueIdentifier>{5770069C-BD36-34BF-B6F1-24F77E9395C0}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>
