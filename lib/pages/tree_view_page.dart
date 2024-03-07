@@ -3,8 +3,8 @@ import 'package:graphview/GraphView.dart';
 
 class TreeViewPage extends StatefulWidget {
   final List<List<int>>? adjacencyMatrix;
-
-  const TreeViewPage({super.key, this.adjacencyMatrix});
+  final List<int>? renames;
+  const TreeViewPage({super.key, this.adjacencyMatrix, this.renames});
   @override
   _TreeViewPageState createState() => _TreeViewPageState();
 }
@@ -45,7 +45,11 @@ class _TreeViewPageState extends State<TreeViewPage> {
                     algorithm: FruchtermanReingoldAlgorithm(),
                     builder: (Node node) {
                       var a = node.key!.value as int;
-                      return rectangleWidget(a + 1);
+                      return rectangleWidget(
+                          (widget.renames!.indexOf(a) + 1).toString() +
+                              ' (' +
+                              (a + 1).toString() +
+                              ')');
                     },
                   )),
             ),
@@ -53,7 +57,7 @@ class _TreeViewPageState extends State<TreeViewPage> {
         ));
   }
 
-  Widget rectangleWidget(int a) {
+  Widget rectangleWidget(String a) {
     return InkWell(
       child: Container(
           width: 50,
@@ -68,7 +72,7 @@ class _TreeViewPageState extends State<TreeViewPage> {
           ),
           child: Center(
               child: Text(
-            '$a',
+            a,
             style: TextStyle(
                 fontSize: 20,
                 color: Color.fromARGB(255, 255, 255, 255),

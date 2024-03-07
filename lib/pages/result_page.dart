@@ -4,9 +4,16 @@ import 'package:flutter/material.dart';
 import 'package:graphview/GraphView.dart';
 
 class ResultPage extends StatefulWidget {
-  const ResultPage({super.key, this.adjacencyMatrix, this.incidenceMatrix});
+  const ResultPage(
+      {super.key,
+      this.adjacencyMatrix,
+      this.newAdjacencyMatrix,
+      this.renames,
+      this.incidenceMatrix});
 
   final List<List<int>>? adjacencyMatrix;
+  final List<List<int>>? newAdjacencyMatrix;
+  final List<int>? renames;
   final List<List<int>>? incidenceMatrix;
 
   @override
@@ -38,8 +45,9 @@ class _ResultPageState extends State<ResultPage> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) =>
-                        TreeViewPage(adjacencyMatrix: widget.adjacencyMatrix),
+                    builder: (context) => TreeViewPage(
+                        adjacencyMatrix: widget.adjacencyMatrix,
+                        renames: widget.renames),
                   ),
                 );
               },
@@ -58,10 +66,16 @@ class _ResultPageState extends State<ResultPage> {
         child: ListView(
           scrollDirection: Axis.vertical,
           children: [
-            Center(child: const Text('Матрица смежности')),
+            Center(child: const Text('Старая матрица смежности')),
             DataTable(
               columns: _a_buildColumns(),
               rows: _a_buildRows(),
+              columnSpacing: 0.0,
+            ),
+            Center(child: const Text('Новая матрица смежности')),
+            DataTable(
+              columns: _na_buildColumns(),
+              rows: _na_buildRows(),
               columnSpacing: 0.0,
             ),
             Center(child: const Text('Матрица инцидентности')),
@@ -137,6 +151,38 @@ class _ResultPageState extends State<ResultPage> {
 
   // Создание ячеек для строки таблицы
   List<DataCell> _a_buildCellsForRow(int rowIndex, List<int> rowData) {
+    List<DataCell> cells = [];
+    cells.add(DataCell(
+        Text('${rowIndex + 1}'))); // Добавляем цифровую метку слева от строки
+    for (int cellData in rowData) {
+      cells.add(DataCell(Text('$cellData')));
+    }
+    return cells;
+  }
+
+  // Создание столбцов таблицы
+  List<DataColumn> _na_buildColumns() {
+    List<DataColumn> columns = [];
+    columns.add(const DataColumn(label: Text(' ')));
+    for (int i = 0; i < widget.newAdjacencyMatrix!.first.length; i++) {
+      columns.add(DataColumn(label: Text((i + 1).toString())));
+    }
+    return columns;
+  }
+
+  // Создание строк таблицы
+  List<DataRow> _na_buildRows() {
+    return widget.newAdjacencyMatrix!.asMap().entries.map((entry) {
+      int rowIndex = entry.key;
+      List<int> rowData = entry.value;
+      return DataRow(
+        cells: _na_buildCellsForRow(rowIndex, rowData),
+      );
+    }).toList();
+  }
+
+  // Создание ячеек для строки таблицы
+  List<DataCell> _na_buildCellsForRow(int rowIndex, List<int> rowData) {
     List<DataCell> cells = [];
     cells.add(DataCell(
         Text('${rowIndex + 1}'))); // Добавляем цифровую метку слева от строки

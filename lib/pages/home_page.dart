@@ -147,75 +147,177 @@ class _DynamicListPageState extends State<DynamicListPage> {
     return numbers;
   }
 
+  List<List<int>> getIncidenceMatrix(List<List<int>> ListOfincidence) {
+    int arc_count = 0;
+
+    for (int j = 0; j < ListOfincidence.length; j++) {
+      for (int i = 0; i < ListOfincidence[j].length; i++) {
+        arc_count += 1;
+      }
+    }
+
+    List<List<int>> IncidenceMatrix = List.generate(
+        ListOfincidence.length, (_) => List<int>.filled(arc_count, 0));
+
+    int arc_num = 0;
+
+    for (int j = 0; j < ListOfincidence.length; j++) {
+      for (int i = 0; i < ListOfincidence[j].length; i++) {
+        if (ListOfincidence[j][i] < ListOfincidence.length) {
+          IncidenceMatrix[ListOfincidence[j][i]][arc_num] = -1;
+          IncidenceMatrix[j][arc_num] = 1;
+          if (ListOfincidence[j][i] == j) {
+            IncidenceMatrix[j][arc_num] = 2;
+          }
+          arc_num += 1;
+        }
+      }
+    }
+    return IncidenceMatrix;
+  }
+
+  List<List<int>> getAdjacencyMatrix(List<List<int>> ListOfincidence) {
+    List<List<int>> AdjacencyMatrix = List.generate(ListOfincidence.length,
+        (_) => List<int>.filled(ListOfincidence.length, 0));
+
+    for (int j = 0; j < ListOfincidence.length; j++) {
+      for (int i = 0; i < ListOfincidence[j].length; i++) {
+        if (ListOfincidence[j][i] < ListOfincidence.length)
+          AdjacencyMatrix[j][ListOfincidence[j][i]] = 1;
+      }
+    }
+
+    return AdjacencyMatrix;
+  }
+
+  List<List<int>> swap(
+      List<List<int>> matrix, List<int> position, int a, int b) {
+    int n = matrix.length;
+    int bufer;
+    for (int i = 0; i < n; i++) {
+      bufer = matrix[i][a];
+      matrix[i][a] = matrix[i][b];
+      matrix[i][b] = bufer;
+    }
+    for (int i = 0; i < n; i++) {
+      bufer = matrix[a][i];
+      matrix[a][i] = matrix[b][i];
+      matrix[b][i] = bufer;
+    }
+    for (int i = 0; i < n; i++) {
+      bufer = position[a];
+      position[a] = position[b];
+      position[b] = bufer;
+    }
+    return matrix;
+  }
+
+  List<int> getRenames(List<List<int>> AdjacencyMatrix) {
+    List<int> sums = List<int>.filled(AdjacencyMatrix.length, 0);
+    List<int> renamed = [];
+    List<int> last_renamed = [];
+    List<int> rename = List<int>.filled(AdjacencyMatrix.length, 0);
+    int n = AdjacencyMatrix.length;
+
+    for (int j = 0; j < n; j++) {
+      for (int i = 0; i < n; i++) {
+        sums[j] += AdjacencyMatrix[i][j];
+      }
+    }
+
+    print(sums);
+
+    int k = 0;
+
+    while (k < n) {
+      int flag = -1;
+
+      for (int j = 0; j < n; j++) {
+        if (sums[j] == 0 && !renamed.contains(j)) {
+          rename[k] = j;
+          renamed.add(j);
+          last_renamed.add(j);
+          flag = 1;
+          k += 1;
+        }
+      }
+
+      if (flag == -1) {
+        print('Невозможно выполнить');
+        return rename;
+      }
+
+      for (int i = 0; i < last_renamed.length; i++) {
+        for (int j = 0; j < n; j++) {
+          sums[j] -= AdjacencyMatrix[last_renamed[i]][j];
+        }
+      }
+
+      last_renamed.clear;
+
+      print(sums);
+    }
+    return rename;
+  }
+
+  List<List<int>> orderFunction(List<List<int>> AdjacencyMatrix) {
+    List<int> sums = List<int>.filled(AdjacencyMatrix.length, 0);
+    List<int> renamed = [];
+    List<int> rename = getRenames(AdjacencyMatrix);
+    int n = AdjacencyMatrix.length;
+
+    List<int> position = [];
+    for (int i = 0; i < n; i++) {
+      position.add(i);
+    }
+
+    for (int i = 0; i < n; i++) {
+      if (position[i] != rename[i]) {
+        swap(AdjacencyMatrix, position, position.indexOf(rename[i]), i);
+      }
+    }
+
+    return AdjacencyMatrix;
+  }
+
   void _compute(BuildContext context) {
     try {
       List<String> savedList = List<String>.from(_listItems);
-      //print(savedList);
-      List<List<int>> newListOfincidence = List.generate(
+
+      List<List<int>> ListOfincidence = List.generate(
           savedList.length, (_) => List<int>.filled(savedList.length, 0));
 
       for (int i = 0; i < savedList.length; i++) {
         if (savedList[i].isEmpty) {
-          print('suka');
-          newListOfincidence[i] = List<int>.empty();
+          print('blyat');
+          ListOfincidence[i] = List<int>.empty();
         } else {
-          newListOfincidence[i] = stringToList(savedList[i]);
+          ListOfincidence[i] = stringToList(savedList[i]);
         }
       }
-      print(newListOfincidence);
-      if (newListOfincidence.isEmpty) {
+
+      //print(ListOfincidence);
+
+      if (ListOfincidence.isEmpty) {
+        print('suka pustoy spisok');
         return;
       }
 
-      for (int j = 0; j < newListOfincidence.length; j++) {
-        for (int i = 0; i < newListOfincidence[j].length; i++) {
-          newListOfincidence[j][i] -= 1;
-        }
-      }
-
-      List<List<int>> newAdjacencyMatrix = List.generate(
-          savedList.length, (_) => List<int>.filled(savedList.length, 0));
-
-      for (int j = 0; j < newListOfincidence.length; j++) {
-        for (int i = 0; i < newListOfincidence[j].length; i++) {
-          if (newListOfincidence[j][i] < newListOfincidence.length)
-            newAdjacencyMatrix[j][newListOfincidence[j][i]] = 1;
-        }
-      }
-
-      int arc_count = 0;
-
-      for (int j = 0; j < newListOfincidence.length; j++) {
-        for (int i = 0; i < newListOfincidence[j].length; i++) {
-          arc_count += 1;
-        }
-      }
-
-      print(arc_count);
-
-      List<List<int>> newIncidenceMatrix = List.generate(
-          savedList.length, (_) => List<int>.filled(arc_count, 0));
-
-      int arc_num = 0;
-
-      for (int j = 0; j < newListOfincidence.length; j++) {
-        for (int i = 0; i < newListOfincidence[j].length; i++) {
-          if (newListOfincidence[j][i] < newListOfincidence.length) {
-            newIncidenceMatrix[newListOfincidence[j][i]][arc_num] = -1;
-            newIncidenceMatrix[j][arc_num] = 1;
-            if (newListOfincidence[j][i] == j) {
-              newIncidenceMatrix[j][arc_num] = 2;
-            }
-            arc_num += 1;
-          }
+      for (int j = 0; j < ListOfincidence.length; j++) {
+        for (int i = 0; i < ListOfincidence[j].length; i++) {
+          ListOfincidence[j][i] -= 1;
+          //потому что внутри кода мы работаем с нумерацией начиная от нуля
         }
       }
 
       Navigator.of(context).push(
         MaterialPageRoute(
           builder: (context) => ResultPage(
-              adjacencyMatrix: newAdjacencyMatrix,
-              incidenceMatrix: newIncidenceMatrix),
+              adjacencyMatrix: getAdjacencyMatrix(ListOfincidence),
+              newAdjacencyMatrix:
+                  orderFunction(getAdjacencyMatrix(ListOfincidence)),
+              renames: getRenames(getAdjacencyMatrix(ListOfincidence)),
+              incidenceMatrix: getIncidenceMatrix(ListOfincidence)),
         ),
       );
     } catch (e) {}
