@@ -78,10 +78,14 @@ class _ResultPageState extends State<ResultPage> {
               rows: _na_buildRows(),
               columnSpacing: 0.0,
             ),
-            Center(child: const Text('Матрица инцидентности')),
             DataTable(
-              columns: _i_buildColumns(),
-              rows: _i_buildRows(),
+              columns: _oi_buildColumns(),
+              rows: _oi_buildRows(),
+              columnSpacing: 0.0,
+            ),
+            DataTable(
+              columns: _ni_buildColumns(),
+              rows: _ni_buildRows(),
               columnSpacing: 0.0,
             ),
           ],
@@ -91,40 +95,79 @@ class _ResultPageState extends State<ResultPage> {
   }
 
   // Создание столбцов таблицы
-  List<DataColumn> _i_buildColumns() {
+  List<DataColumn> _oi_buildColumns() {
     List<DataColumn> columns = [];
     columns.add(const DataColumn(label: Text(' ')));
-    for (int i = 0; i < widget.incidenceMatrix!.first.length; i++) {
-      columns.add(DataColumn(label: Text(_i_getColumnLabel(i))));
-    }
+    columns.add(const DataColumn(label: Text('Старые правые инциденции')));
     return columns;
   }
 
-  // Получение метки для столбца на основе его индекса (a, b, c, ...)
-  String _i_getColumnLabel(int index) {
-    // В ASCII таблице символ 'a' имеет код 97, 'b' - 98 и т.д.
-    return String.fromCharCode(97 + index);
+  List<DataColumn> _ni_buildColumns() {
+    List<DataColumn> columns = [];
+    columns.add(const DataColumn(label: Text(' ')));
+    columns.add(const DataColumn(label: Text('Новые правые инциденции')));
+    return columns;
   }
 
   // Создание строк таблицы
-  List<DataRow> _i_buildRows() {
+  List<DataRow> _ni_buildRows() {
     return widget.incidenceMatrix!.asMap().entries.map((entry) {
       int rowIndex = entry.key;
       List<int> rowData = entry.value;
       return DataRow(
-        cells: _i_buildCellsForRow(rowIndex, rowData),
+        cells: _ni_buildCellsForRow(rowIndex, rowData),
       );
     }).toList();
   }
 
   // Создание ячеек для строки таблицы
-  List<DataCell> _i_buildCellsForRow(int rowIndex, List<int> rowData) {
+  List<DataCell> _ni_buildCellsForRow(int rowIndex, List<int> rowData) {
     List<DataCell> cells = [];
+
     cells.add(DataCell(
         Text('${rowIndex + 1}'))); // Добавляем цифровую метку слева от строки
-    for (int cellData in rowData) {
-      cells.add(DataCell(Text('$cellData')));
+
+    String text = '';
+
+    for (int i = 0; i < widget.newAdjacencyMatrix!.length; i++) {
+      if (widget.newAdjacencyMatrix![rowIndex][i] == 1) {
+        text += (i + 1).toString() + '    ';
+      }
     }
+
+    cells.add(DataCell(Text(text)));
+
+    return cells;
+  }
+
+  // Создание строк таблицы
+  List<DataRow> _oi_buildRows() {
+    return widget.incidenceMatrix!.asMap().entries.map((entry) {
+      int rowIndex = entry.key;
+      List<int> rowData = entry.value;
+      return DataRow(
+        cells: _oi_buildCellsForRow(rowIndex, rowData),
+      );
+    }).toList();
+  }
+
+  // Создание ячеек для строки таблицы
+  List<DataCell> _oi_buildCellsForRow(int rowIndex, List<int> rowData) {
+    List<DataCell> cells = [];
+
+    cells.add(DataCell(
+        Text('${rowIndex + 1}'))); // Добавляем цифровую метку слева от строки
+
+    String text = '';
+
+    for (int i = 0; i < widget.adjacencyMatrix!.length; i++) {
+      if (widget.adjacencyMatrix![rowIndex][i] == 1) {
+        text += (i + 1).toString() + '    ';
+      }
+    }
+
+    cells.add(DataCell(Text(text)));
+
     return cells;
   }
 

@@ -12,18 +12,65 @@ class HomePage extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: DynamicListPage(),
+      home: TablePage(),
     );
   }
 }
 
-class DynamicListPage extends StatefulWidget {
+class TablePage extends StatefulWidget {
   @override
-  _DynamicListPageState createState() => _DynamicListPageState();
+  _TablePageState createState() => _TablePageState();
 }
 
-class _DynamicListPageState extends State<DynamicListPage> {
-  List<String> _listItems = [];
+class _TablePageState extends State<TablePage> {
+  int rowCount = 2;
+  int columnCount = 2;
+  List<List<int>> tableData = [[]];
+  List<List<TextEditingController>> controllers = [[]];
+
+  @override
+  void initState() {
+    super.initState();
+    _initializeTable();
+  }
+
+  void _initializeTable() {
+    tableData.clear();
+    for (int i = 0; i < rowCount; i++) {
+      List<int> row = List.filled(columnCount, 0);
+      tableData.add(row);
+    }
+    _initializeControllers();
+  }
+
+  void _initializeControllers() {
+    controllers.clear();
+    for (int i = 0; i < rowCount; i++) {
+      List<TextEditingController> rowControllers = [];
+      for (int j = 0; j < columnCount; j++) {
+        TextEditingController controller = TextEditingController();
+        controller.text = '0';
+        rowControllers.add(controller);
+      }
+      controllers.add(rowControllers);
+    }
+  }
+
+  void _saveTableData() {
+    List<List<int>> newData = [];
+    for (int i = 0; i < rowCount; i++) {
+      List<int> row = [];
+      for (int j = 0; j < columnCount; j++) {
+        int value = int.parse(controllers[i][j].text);
+        row.add(value);
+      }
+      newData.add(row);
+    }
+    setState(() {
+      tableData = newData;
+    });
+    _compute(context);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -31,114 +78,141 @@ class _DynamicListPageState extends State<DynamicListPage> {
       appBar: AppBar(
         scrolledUnderElevation: 0.0,
         backgroundColor: Colors.white,
-        title: const Text('Множество правых инциденций'),
+        title: const Text('Матрица инцидентности'),
       ),
-      body: Column(
-        children: <Widget>[
-          Container(
-            color: Colors.white,
-            child: const Padding(
-              padding: EdgeInsets.all(20.0),
-              child: Text(
-                  'Введите вершины в которые можно \nнепос­редственно попасть из этой вершины',
-                  style: TextStyle(
-                      fontSize: 16,
-                      color: Colors.black87,
-                      fontWeight: FontWeight.normal)),
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            SizedBox(height: 10),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text('Вершин: '),
+                SizedBox(width: 10),
+                DropdownButton<int>(
+                  value: rowCount,
+                  onChanged: (value) {
+                    setState(() {
+                      rowCount = value!;
+                      _initializeTable();
+                    });
+                  },
+                  items: List.generate(15, (index) {
+                    return DropdownMenuItem<int>(
+                      value: index + 1,
+                      child: Text('${index + 1}'),
+                    );
+                  }),
+                ),
+                SizedBox(width: 20),
+                Text('Дуг: '),
+                SizedBox(width: 10),
+                DropdownButton<int>(
+                  value: columnCount,
+                  onChanged: (value) {
+                    setState(() {
+                      columnCount = value!;
+                      _initializeTable();
+                    });
+                  },
+                  items: List.generate(15, (index) {
+                    return DropdownMenuItem<int>(
+                      value: index + 1,
+                      child: Text('${index + 1}'),
+                    );
+                  }),
+                ),
+              ],
             ),
-          ),
-          Expanded(
-            child: ListView.builder(
-              itemCount: _listItems.length,
-              itemBuilder: (context, index) {
-                return Padding(
-                  padding: const EdgeInsets.only(left: 9, right: 9, bottom: 10),
-                  child: ListTile(
-                    tileColor: const Color.fromARGB(31, 163, 162, 177),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    leading: CircleAvatar(
-                        backgroundColor:
-                            const Color.fromARGB(255, 196, 194, 235),
-                        child: Text((index + 1).toString(),
-                            style: const TextStyle(
-                                fontSize: 16,
-                                color: Color.fromARGB(255, 0, 0, 0),
-                                fontWeight: FontWeight.normal))),
-                    title: TextFormField(
-                      decoration: InputDecoration(
-                        //icon: Icon(Icons.person),
-                        hintText: 'Куда можно попасть',
-                        filled: true,
-                        fillColor: const Color.fromARGB(0, 53, 22, 22),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(10),
-                          borderSide: BorderSide.none,
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(10),
-                          borderSide: const BorderSide(
-                              color: Color.fromARGB(255, 141, 105, 240)),
-                        ),
-                        errorBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(10),
-                          borderSide: const BorderSide(color: Colors.red),
-                        ),
-                      ),
-                      initialValue: _listItems[index],
-                      onChanged: (value) {
-                        _listItems[index] = value;
-                      },
-                      style: const TextStyle(
-                          fontSize: 14,
-                          color: Color.fromARGB(255, 0, 0, 0),
-                          fontWeight: FontWeight.normal),
-                    ),
+            SizedBox(height: 10),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Row(
+                children: [
+                  DataTable(
+                    horizontalMargin: 0,
+                    columnSpacing: 0,
+                    columns: collumns(columnCount),
+                    rows: List.generate(rowCount, (i) {
+                      return DataRow(
+                        cells: List.generate(columnCount, (j) {
+                          return DataCell(
+                            SizedBox(
+                              width: (MediaQuery.of(context).size.width - 16) /
+                                  columnCount,
+                              child: Center(
+                                child: TextField(
+                                  controller: controllers[i][j],
+                                  decoration: InputDecoration(
+                                    //border: OutlineInputBorder(),
+                                    hintText: 'Enter data (-1, 0, 1)',
+                                  ),
+                                  onChanged: (value) {
+                                    if (value != '-' &&
+                                        value != '0' &&
+                                        value != '1' &&
+                                        value != '-1') {
+                                      controllers[i][j].text = '';
+                                    }
+                                  },
+                                ),
+                              ),
+                            ),
+                          );
+                        }),
+                      );
+                    }),
                   ),
-                );
-              },
+                ],
+              ),
             ),
-          ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              ElevatedButton(
-                onPressed: _addItemToList,
-                child: const Text('Добавить'),
-              ),
-              ElevatedButton(
-                onPressed: _removeItem,
-                child: const Text('Удалить'),
-              ),
-              ElevatedButton(
-                onPressed: () {
-                  _compute(context);
-                },
-                child: const Text('Перевести'),
-              ),
-            ],
-          ),
-        ],
+            SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: _saveTableData,
+              child: Text('Перевести'),
+            ),
+          ],
+        ),
       ),
     );
   }
 
-  void _addItemToList() {
-    setState(() {
-      _listItems.add('');
-    });
+  List<DataColumn> collumns(int count) {
+    List<DataColumn> collumns_list = List.generate(
+        count,
+        (index) => DataColumn(
+            label: Text('${String.fromCharCode(97 + index).toUpperCase()}')));
+    return collumns_list;
   }
 
-  void _removeItem() {
-    setState(() {
-      if (_listItems.isNotEmpty) {
-        _listItems.removeAt(_listItems.length - 1);
-      }
-    });
+  List<DataCell> cells(int i, int count) {
+    List<DataCell> cells_list = <DataCell>[DataCell(Text(' '))];
+
+    for (int j = 0; j < count; j++) {
+      cells_list.add(DataCell(
+        SizedBox(
+          width: (MediaQuery.of(context).size.width - 16) / columnCount,
+          child: Center(
+            child: TextField(
+              controller: controllers[i][j],
+              decoration: InputDecoration(
+                //border: OutlineInputBorder(),
+                hintText: 'Enter data (-1, 0, 1)',
+              ),
+              onChanged: (value) {
+                if (value != '-' &&
+                    value != '0' &&
+                    value != '1' &&
+                    value != '-1') {
+                  controllers[i][j].text = '';
+                }
+              },
+            ),
+          ),
+        ),
+      ));
+    }
+    return cells_list;
   }
 
   List<int> stringToList(String input) {
@@ -282,17 +356,21 @@ class _DynamicListPageState extends State<DynamicListPage> {
 
   void _compute(BuildContext context) {
     try {
-      List<String> savedList = List<String>.from(_listItems);
+      List<List<int>> ListOfincidence = List.generate(rowCount, (_) => <int>[]);
 
-      List<List<int>> ListOfincidence = List.generate(
-          savedList.length, (_) => List<int>.filled(savedList.length, 0));
-
-      for (int i = 0; i < savedList.length; i++) {
-        if (savedList[i].isEmpty) {
-          print('blyat');
-          ListOfincidence[i] = List<int>.empty();
-        } else {
-          ListOfincidence[i] = stringToList(savedList[i]);
+      for (int j = 0; j < columnCount; j++) {
+        for (int i = 0; i < rowCount; i++) {
+          if (tableData[i][j] == -1) {
+            for (int k = 0; k < rowCount; k++) {
+              if (tableData[k][j] == 1) {
+                ListOfincidence[i].add(k);
+                break;
+              }
+            }
+          }
+          if (tableData[i][j] == 2) {
+            ListOfincidence[i].add(i);
+          }
         }
       }
 
@@ -301,13 +379,6 @@ class _DynamicListPageState extends State<DynamicListPage> {
       if (ListOfincidence.isEmpty) {
         print('suka pustoy spisok');
         return;
-      }
-
-      for (int j = 0; j < ListOfincidence.length; j++) {
-        for (int i = 0; i < ListOfincidence[j].length; i++) {
-          ListOfincidence[j][i] -= 1;
-          //потому что внутри кода мы работаем с нумерацией начиная от нуля
-        }
       }
 
       Navigator.of(context).push(

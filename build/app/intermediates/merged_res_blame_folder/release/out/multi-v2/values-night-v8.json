@@ -4,7 +4,7 @@
             "outputFile": "com.example.sa_lr1_app-mergeReleaseResources-9:/values-night-v8/values-night-v8.xml",
             "map": [
                 {
-                    "source": "C:\\Users\\vsmor\\sa_lr1_app\\android\\app\\src\\main\\res\\values-night\\styles.xml",
+                    "source": "C:\\Users\\vsmor\\sa_lr2_app\\android\\app\\src\\main\\res\\values-night\\styles.xml",
                     "from": {
                         "startLines": "3,14",
                         "startColumns": "4,4",
