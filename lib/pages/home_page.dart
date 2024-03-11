@@ -278,11 +278,10 @@ class _TablePageState extends State<TablePage> {
       matrix[a][i] = matrix[b][i];
       matrix[b][i] = bufer;
     }
-    for (int i = 0; i < n; i++) {
-      bufer = position[a];
-      position[a] = position[b];
-      position[b] = bufer;
-    }
+    bufer = position[a];
+    position[a] = position[b];
+    position[b] = bufer;
+
     return matrix;
   }
 
@@ -327,7 +326,7 @@ class _TablePageState extends State<TablePage> {
         }
       }
 
-      last_renamed.clear;
+      last_renamed = [];
 
       print(sums);
     }
@@ -360,9 +359,9 @@ class _TablePageState extends State<TablePage> {
 
       for (int j = 0; j < columnCount; j++) {
         for (int i = 0; i < rowCount; i++) {
-          if (tableData[i][j] == -1) {
+          if (tableData[i][j] == 1) {
             for (int k = 0; k < rowCount; k++) {
-              if (tableData[k][j] == 1) {
+              if (tableData[k][j] == -1) {
                 ListOfincidence[i].add(k);
                 break;
               }

@@ -74,7 +74,7 @@ class _TreeViewPageState extends State<TreeViewPage> {
               child: Text(
             a,
             style: TextStyle(
-                fontSize: 20,
+                fontSize: 16,
                 color: Color.fromARGB(255, 255, 255, 255),
                 fontWeight: FontWeight.bold),
           ))),
